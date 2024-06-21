@@ -6,6 +6,7 @@ import { format } from "date-fns";
 function Events() {
   const [events, setEvents] = useState([]);
   const [filter, setFilter] = useState("all");
+
   const handleUpdateStatus = async (eventId, currentStatus) => {
     const eventDoc = doc(db, "events", eventId);
     const newStatus = currentStatus === "pending" ? "accepted" : "pending";
@@ -34,14 +35,22 @@ function Events() {
       }
 
       const eventSnapshot = await getDocs(eventCollection);
-      const eventList = eventSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      const eventList = eventSnapshot.docs.map((doc) => {
+        const data = doc.data();
+        // Convert Firestore Timestamps to JavaScript Date objects
+        const formattedEvent = {
+          id: doc.id,
+          ...data,
+          event_date: data.event_date ? data.event_date.toDate() : null,
+          deadline: data.deadline ? data.deadline.toDate() : null,
+        };
+        return formattedEvent;
+      });
       setEvents(eventList);
     };
 
     fetchEvents();
   }, [filter,handleUpdateStatus]);
-
-  
 
   const handleDeleteEvent = async (eventId) => {
     const eventDoc = doc(db, "events", eventId);
@@ -78,12 +87,16 @@ function Events() {
               <p className="text-gray-600 mb-2">
                 <span className="font-semibold">Hosted by:</span> {event.hosted_by}
               </p>
-              <p className="text-gray-600 mb-2">
-                <span className="font-semibold">Date:</span> {format(event.event_date.toDate(), "MMMM dd, yyyy h:mm a")}
-              </p>
-              <p className="text-gray-600 mb-2">
-                <span className="font-semibold">Deadline:</span> {format(event.deadline.toDate(), "MMMM dd, yyyy h:mm a")}
-              </p>
+              {event.event_date && (
+                <p className="text-gray-600 mb-2">
+                  <span className="font-semibold">Date:</span> {format(event.event_date, "MMMM dd, yyyy h:mm a")}
+                </p>
+              )}
+              {event.deadline && (
+                <p className="text-gray-600 mb-2">
+                  <span className="font-semibold">Deadline:</span> {format(event.deadline, "MMMM dd, yyyy h:mm a")}
+                </p>
+              )}
               <p className="text-gray-600 mb-4">{event.details}</p>
               <p className="text-gray-600 mb-2">
                 <span className="font-semibold">Contact:</span> {event.contact}
