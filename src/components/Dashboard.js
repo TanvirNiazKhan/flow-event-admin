@@ -1,7 +1,15 @@
 import React from "react";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 
 function Dashboard() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Perform any logout logic here (e.g., clearing authentication tokens)
+    // Redirect to the login page
+    navigate("/");
+  };
+
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
@@ -34,7 +42,10 @@ function Dashboard() {
         {/* Header */}
         <header className="bg-white shadow p-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold">Welcome to the Dashboard</h1>
-          <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          <button
+            onClick={handleLogout}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
             Logout
           </button>
         </header>
